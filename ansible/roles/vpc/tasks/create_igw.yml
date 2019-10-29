@@ -1,0 +1,24 @@
+---
+
+- name: "Include tasks to find internet gateway for VPC: {{ aws_vpc_name }}"
+  include_tasks: find_igw.yml
+
+
+- block:
+    - name: "Create igw for: {{ aws_vpc_name }}"
+      ec2_vpc_igw:
+        region: "{{ aws_vpc_region }}"
+        vpc_id: "{{ vpc_id }}"
+        tags:
+          Name: "{{ cloud_name }}-igw"
+        state: present
+      register: _vpc_igw_create_result
+
+
+    - debug:
+        msg: "{{ _vpc_igw_create_result }}"
+      when: "debug_aws | default(False) "
+
+    - set_fact:
+        vpc_igw_id: "{{ _vpc_igw_create_result.gateway_id }}"
+  when: not vpc_igw_created

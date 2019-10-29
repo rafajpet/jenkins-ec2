@@ -1,0 +1,31 @@
+---
+
+- name: "Find ebs volume with name: {{ ebs_name }}"
+  ec2_vol_facts:
+    filters:
+      "tag:Name": "{{ ebs_name }}"
+  register: _ebs_find_result
+
+
+- debug:
+    msg: "{{ _ebs_find_result }}"
+  when: "debug_aws | default(False) "
+
+- set_fact:
+    ebs_created: "{{ _ebs_find_result.volumes | length > 0 }}"
+
+
+- set_fact:
+    ebs_id: "{{ _ebs_find_result.volumes[0].id }}"
+    ebs_status: "{{ _ebs_find_result.volumes[0].status }}"
+
+  when: ebs_created
+
+
+- name: "Attach ebs into instance"
+  ec2_vol:
+    instance: "{{ ec2_id }}"
+    id: "{{ ebs_id }}"
+    device_name: "{{ ebs_volume_name }}"
+    delete_on_termination: no
+  when: ebs_status == 'available'

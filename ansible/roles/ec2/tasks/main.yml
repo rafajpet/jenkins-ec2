@@ -1,0 +1,38 @@
+---
+
+- name: "Include tasks to find ec2 instance"
+  include_tasks: find_ec2.yml
+
+- name: "Create ec2 instance"
+  block:
+
+    - name: "Include tasks to create ec2 instance"
+      include_tasks: create_ec2_instance.yml
+
+
+    - name: "Include tasks to create ebs volume"
+      include_tasks: create_ebs.yml
+      when: "create_ebs | default(False)"
+
+  when: "create_ec2 | default(False)"
+
+
+# - name: "Include tasks to create ebs volume"
+#   include_tasks: create_ebs.yml
+#   when: create_ebs | default(False)
+#
+#
+# - name: "Remove ec2 instance"
+#   block:
+#     - name: "Include tasks to remove ec2 instance"
+#       include_tasks: remove_ec2_instance.yml
+#
+#   when: "remove_ec2 | default(False)"
+#
+#
+# - name: "Get info about ec2 instance"
+#   block:
+#     - name: "Get info about running ec2 instance"
+#       include_tasks: register_ec2_info.yml
+#
+#   when: "get_ec2_info | default(False)"

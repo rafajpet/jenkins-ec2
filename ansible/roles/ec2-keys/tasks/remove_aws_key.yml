@@ -1,0 +1,18 @@
+---
+
+- name: "Remove ec2 key with name: {{ ec2_key_name }}"
+  ec2_key:
+    name: "{{ ec2_key_name }}"
+    state: absent
+  register: ec2_key_out
+
+- debug:
+
+    msg: "Keys removed: {{ ec2_key_out }}"
+  when: "debug_aws | default(False)"
+
+
+- name: "Remvove ec2 key in host location: {{ ec2_keys_location }} with name: {{ ec2_key_name }}"
+  file:
+    path: "{{ ec2_keys_location }}/{{ ec2_key_name }}"
+    state: absent

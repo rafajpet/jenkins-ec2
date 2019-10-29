@@ -1,0 +1,22 @@
+---
+
+- name: Gather facts about a filtered list of Internet Gateways
+  ec2_vpc_igw_facts:
+    region: "{{ aws_vpc_region }}"
+    filters:
+        "tag:Name": "{{ cloud_name }}-igw"
+  register: _vpc_igw_find_result
+
+
+- debug:
+    msg: "{{ _vpc_igw_find_result }}"
+  when: "debug_aws | default(False)"
+
+
+- set_fact:
+    vpc_igw_created: False
+
+
+- set_fact:
+    vpc_igw_created: True
+  when: "_vpc_igw_find_result.internet_gateways"

@@ -1,0 +1,29 @@
+---
+
+- name: "Include tasks to find ebs volume: {{ ebs_name }}"
+  include_tasks: find_ebs.yml
+
+
+- block:
+    - name: "Create ec2 ebs volume"
+      ec2_vol:
+        instance: "{{ ec2_id }}"
+        volume_size: "{{ ebs_volume_size }}"
+        volume_type: "{{ ebs_volume_type }}"
+        device_name: "{{ ebs_volume_name }}"
+        region: "{{ aws_vpc_region }}"
+        name: "{{ ebs_name }}"
+        state: present
+      register: _ebs_volume_created_result
+
+
+    - name: "Set fact about ebs volume"
+      set_fact:
+        ebs_id: "{{ _ebs_volume_created_result.volume_id }}"
+        ebs_created: True
+
+    - debug:
+        msg: "{{ _ebs_volume_created_result }}"
+      when: "debug_aws | default(False)"
+
+  when: not ebs_created

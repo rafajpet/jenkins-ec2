@@ -1,0 +1,30 @@
+---
+
+- block:
+    - name: "Include tasks to install VPC: {{ aws_vpc_name }}"
+      include_tasks: create_vpc.yml
+
+
+    - name: "Include tasks to create subnets"
+      include_tasks: create_subnets.yml
+
+
+    - name: "Include tasks to create internet gateway"
+      include_tasks: create_igw.yml
+
+
+    - name: "Include tasks to create route table"
+      include_tasks: create_route_table.yml
+
+
+    - name: "Incldue tasks to create security group"
+      include_tasks: create_security_group.yml
+
+  when: "not remove_vpc | default(False)"
+
+
+- block:
+    - name: "Delete vpc with name: {{ aws_vpc_name }}"
+      include_tasks: remove_vpc.yml
+
+  when: "remove_vpc | default(False)"

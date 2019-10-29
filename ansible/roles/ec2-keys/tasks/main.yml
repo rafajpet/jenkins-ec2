@@ -1,0 +1,10 @@
+---
+
+- name: "Include task to create aws key pair with name: {{ ec2_key_name }}"
+  include_tasks: create_aws_key.yml
+  when: "not remove_aws_key | default(False)"
+
+
+- name: "Include task to remove aws key pair with name: {{ ec2_key_name }}"
+  include_tasks: remove_aws_key.yml
+  when: "remove_aws_key | default(False)"

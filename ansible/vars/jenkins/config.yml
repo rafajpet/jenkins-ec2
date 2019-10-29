@@ -1,0 +1,52 @@
+---
+
+# aws VPC, subnets configuration
+cloud_name: "jenkins-demo"
+
+aws_vpc_name: "{{ cloud_name }}-vpc"
+
+
+aws_vpc_region: "eu-central-1"
+aws_vpc_cidrblock: "10.0.0.0/16"
+aws_vpc_zones:
+  public-zone:
+    zone: "{{ aws_vpc_region }}a"
+    subnet: "10.0.0.0/24"
+    public: True
+
+
+# ssh allow only from IP
+# ec2_ssh_ip_allowed: "0.0.0.0/32"
+
+aws_group_rules:
+  - proto: tcp
+    from_port: 22
+    to_port: 22
+    cidr_ip: "{{ ec2_ssh_ip_allowed }}"
+  - proto: all
+    cidr_ip: "{{ aws_vpc_cidrblock }}"
+
+java_packages:
+  - openjdk-11-jdk
+jenkins_version: "2.189"
+
+jenkins_admin_username: admin
+jenkins_admin_password: admin
+jenkins_plugins:
+  - "dashboard-view"
+  - "view-job-filters"
+  - "cloudbees-folder"
+  - "monitoring"
+  - "disk-usage"
+  - "build-pipeline-plugin"
+  - "jenkins-multijob-plugin"
+  - "git"
+  - "github-pullrequest"
+
+mount_ebs: True
+ebs_name: "jenkins-volume"
+jenkins_home: /var/lib/jenkins
+ebs_mount_folder: "{{ jenkins_home }}"
+ebs_volume_size: 10
+ebs_volume_type: gp2
+ebs_volume_name: "/dev/xvdf"

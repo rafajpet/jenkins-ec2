@@ -1,0 +1,20 @@
+---
+
+# Gather facts about any VPC route table with a tag key Name and value Example
+- name: "Find route table"
+  ec2_vpc_route_table_facts:
+    filters:
+      "tag:Name": "{{ name }}-{{ cloud_name }}"
+  vars:
+    name: "{{ item }}"
+  with_items: "{{ aws_vpc_zones.keys() | list }}"
+  register: _vpc_route_table_find_result
+
+- debug:
+    msg: "{{ _vpc_route_table_find_result }}"
+  when: "debug_aws | default(False)"
+
+
+#TODO need filter all route find_route_table
+- set_fact:
+    vpc_route_table_created: "{{ _vpc_route_table_find_result.results[0].route_tables }}"

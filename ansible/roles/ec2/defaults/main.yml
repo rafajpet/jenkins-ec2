@@ -1,0 +1,6 @@
+ec2_instance_image: "ami-0ac05733838eabc06"
+ec2_instance_type: "t2.micro"
+
+ebs_volume_size: 10
+ebs_volume_type: gp2
+ebs_volume_name: "/dev/xvdf"

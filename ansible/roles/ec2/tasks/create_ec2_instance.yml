@@ -1,0 +1,31 @@
+---
+
+- block:
+    - name: "Create ec2 instance with image:"
+      ec2:
+        key_name: "{{ ec2_key_name }}"
+        instance_type: "{{ ec2_instance_type }}"
+        image: "{{ ec2_instance_image }}"
+        wait: yes
+        group_id: "{{ security_group_id }}"
+        count: 1
+        vpc_subnet_id: "{{ vpc_subnet_id }}"
+        assign_public_ip: yes
+        instance_tags:
+          Name: "{{ cloud_name }}"
+        state: present
+      register: "_ec2_create_result"
+
+
+    - debug:
+        msg: "{{ _ec2_create_result }}"
+      when: "debug_aws | default(False) "
+
+
+    - name: "Set info about created instance"
+      set_fact:
+        ec2_id: "{{ _ec2_create_result.instances[0].id }}"
+        ec2_user: "ubuntu"
+        ec2_public_dns_name: "{{ _ec2_create_result.instances[0].public_dns_name }}"
+
+  when: not ec2_created

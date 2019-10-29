@@ -1,0 +1,28 @@
+---
+
+- name: "Include tasks to get info about VPC: {{ aws_vpc_name }}"
+  include_tasks: find_vpc.yml
+
+- name: "Create aws VPC"
+  block:
+    - name: "Create aws VPC: {{ aws_vpc_name }}"
+      ec2_vpc_net:
+        name: "{{ aws_vpc_name }}"
+        cidr_block: "{{ aws_vpc_cidrblock }}"
+        region: "{{ aws_vpc_region }}"
+        tenancy: default
+        tags:
+          Name: "{{ aws_vpc_name }}"
+        state: present
+      register: _vpc_create_result
+
+
+    - debug:
+        msg: "{{ _vpc_create_result }}"
+      when: "debug_aws | default(False)"
+
+
+    - set_fact:
+        vpc_id: "{{ _vpc_create_result.vpc.id }}"
+
+  when: "not vpc_created"

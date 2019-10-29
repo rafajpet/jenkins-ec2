@@ -1,0 +1,26 @@
+---
+  
+- name: "Find aws VPS with name: {{ aws_vpc_name }}"
+  ec2_vpc_net_facts:
+    filters:
+      "tag:Name": "{{ aws_vpc_name }}"
+  register: "_vpc_find_result"
+
+
+- debug:
+    msg: "{{ _vpc_find_result }}"
+  when: "debug_aws | default(False)"
+
+
+- set_fact:
+    vpc_created: False
+
+- set_fact:
+    vpc_created: True
+    vpc_id: "{{ _vpc_find_result.vpcs[0]['vpc_id'] }}"
+  when: "_vpc_find_result.vpcs | length > 0"
+
+
+- debug:
+    msg: "VPC: {{ aws_vpc_name }} already created with ID: {{ vpc_id }}"
+  when: "debug_aws | default(False) and vpc_created is defined  and vpc_created"

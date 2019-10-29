@@ -1,0 +1,110 @@
+---
+
+- name: "Delete aws VPC: {{ aws_vpc_name }}"
+  ec2_vpc_net_facts:
+    filters:
+      "tag:Name": "{{ aws_vpc_name }}"
+  register: vpc_result
+
+- meta: end_play
+  when: "vpc_result.vpcs|length == 0"
+
+- set_fact:
+   vpc_id: "{{ vpc_result.vpcs[0]['vpc_id'] }}"
+
+
+- debug:
+    msg: "{{ vpc_result }}"
+  when: "debug_aws | default(False) "
+
+
+- debug:
+    msg: "AWS VPC to delete: {{ vpc_id }}"
+
+
+- name: "Delete aws subnet for: {{ aws_vpc_name }}"
+  ec2_vpc_subnet:
+    region: "{{ aws_vpc_region }}"
+    vpc_id: "{{ vpc_id }}"
+    az: "{{ az }}"
+    cidr: "{{ subnet }}"
+    map_public: "{{ public_ip }}"
+    resource_tags:
+      Name: "{{ name }}"
+    state: absent
+    wait: True
+  vars:
+    name: "{ item.key }}-{{ cloud_name }}"
+    az: "{{ item.value['zone'] }}"
+    subnet: "{{ item.value['subnet'] }}"
+    public_ip: "{{ item.value['public'] | default(False) }}"
+  with_dict: "{{ aws_vpc_zones }}"
+  register: vpc_subnet_result
+
+
+- debug:
+    msg: "{{ vpc_subnet_result }}"
+  when: "debug_aws | default(False) "
+
+
+- name: "Delete igw for: {{ aws_vpc_name }}"
+  ec2_vpc_igw:
+    region: "{{ aws_vpc_region }}"
+    vpc_id: "{{ vpc_id }}"
+    tags:
+      Name: "{{ aws_vpc_name }}-igw"
+    state: absent
+  register: vpc_igw_result
+
+
+- debug:
+    msg: "{{ vpc_igw_result }}"
+  when: "debug_aws | default(False) "
+
+
+- name: "Delete subnet route table for: {{ aws_vpc_name }}"
+  ec2_vpc_route_table:
+    region: "{{ aws_vpc_region }}"
+    vpc_id: "{{ vpc_id }}"
+    tags:
+      Name: "{{ name }}"
+    subnets: "{{ name }}"
+    state: absent
+  vars:
+    name: "{{ item }}-{{ cloud_name }}"
+  with_items: "{{ aws_vpc_zones.keys() | list }}"
+  register: subnet_rt_result
+
+
+- debug:
+    msg: "{{ subnet_rt_result }}"
+  when: "debug_aws | default(False)"
+
+
+- name: "Delete security group for: {{ aws_vpc_name }}"
+  ec2_group:
+    name: "{{ aws_vpc_name }}"
+    vpc_id: "{{ vpc_id }}"
+    region: "{{ aws_vpc_region }}"
+    state: absent
+  register: security_group_result
+
+
+- debug:
+    msg: "{{ security_group_result }}"
+  when: "debug_aws | default(False)"
+
+
+- name: "Delete aws VPC: {{ aws_vpc_name }}"
+  ec2_vpc_net:
+    name: "{{ aws_vpc_name }}"
+    cidr_block: "{{ aws_vpc_cidrblock }}"
+    region: "{{ aws_vpc_region }}"
+    tenancy: default
+    state: absent
+  register: deleted_vpc_result
+
+
+- debug:
+    msg: "{{ deleted_vpc_result }}"
+  when: "debug_aws | default(False)"

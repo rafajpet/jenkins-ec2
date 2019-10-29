@@ -1,0 +1,42 @@
+---
+
+- name: "Create ec2 key with name: {{ ec2_key_name }}"
+  ec2_key:
+    name: "{{ ec2_key_name }}"
+  register: ec2_key_out
+
+
+- debug:
+    msg: "Keys created: {{ ec2_key_out }}"
+  when: "debug_aws | default(False)"
+
+
+- name: "Create ec2 key in host location: {{ ec2_keys_location }} with name: {{ ec2_key_name }}"
+  file:
+    path: "{{ ec2_keys_location }}/{{ ec2_key_name }}"
+    state: touch
+    mode: 0600
+  when: ec2_key_out.changed
+
+
+- name: "Copy key into {{ ec2_keys_location }}/{{ ec2_key_name }}"
+  shell: |
+    echo '{{ ec2_key_out.key.private_key }}' > {{ ec2_keys_location }}/{{ ec2_key_name }}
+  when: ec2_key_out.changed
+
+
+- name: "Load private key into property for provisioning"
+  set_fact:
+    ec2_ssh_private_key: "{{ ec2_key_out.key.private_key }}"
+  when: ec2_key_out.changed
+
+
+- name: "Load private key into property from file"
+  set_fact:
+    ec2_ssh_private_key: "{{lookup('file', '{{ ec2_keys_location }}/{{ ec2_key_name }}')}}"
+  when: not ec2_key_out.changed
+
+
+- debug:
+    msg: "SSH private key for ec2: {{ ec2_ssh_private_key }}"
+  when: "debug_aws | default(False)"

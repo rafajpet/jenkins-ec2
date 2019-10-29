@@ -1,0 +1,21 @@
+---
+
+- name: "Find security group for VPC: {{ aws_vpc_name }}"
+  ec2_group_facts:
+    filters:
+      "tag:Name": "{{ aws_vpc_name }}"
+  register: "_ec2_security_group_find_result"
+
+
+- debug:
+    msg: "{{ _ec2_security_group_find_result }}"
+  when: "debug_aws | default(False)"
+
+
+#TODO need filter all
+- set_fact:
+    vpc_security_group_created: "{{ _ec2_security_group_find_result.security_groups | length > 0 }}"
+
+- set_fact:
+    security_group_id: "{{ _ec2_security_group_find_result.security_groups[0].group_id }}"
+  when: vpc_security_group_created

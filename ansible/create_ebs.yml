@@ -1,0 +1,17 @@
+- hosts: localhost
+  connection: local
+  environment:
+    AWS_ACCESS_KEY_ID: "{{ aws_access_key }}"
+    AWS_SECRET_ACCESS_KEY: "{{ aws_secret_key }}"
+    AWS_DEFAULT_REGION: "{{ aws_region }}"
+
+  vars:
+    create_ebs: True
+    info_ebs: True
+  vars_files:
+    - vars/sensitive.yml
+    - vars/jenkins/config.yml
+
+  roles:
+    - role: ebs
+      tags: ebs

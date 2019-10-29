@@ -1,0 +1,29 @@
+- hosts: localhost
+  connection: local
+  gather_facts: False
+  environment:
+    AWS_ACCESS_KEY_ID: "{{ aws_access_key }}"
+    AWS_SECRET_ACCESS_KEY: "{{ aws_secret_key }}"
+    AWS_DEFAULT_REGION: "{{ aws_region }}"
+
+  vars:
+    debug_aws: True
+    #important property for deleting vpc with all object related to created vpc
+    remove_vpc: True
+    #important property for deleting ec2 key
+    remove_aws_key: True
+    # remove ec2 instance
+    remove_ec2: True
+  vars_files:
+    - vars/sensitive.yml
+    - vars/jenkins/config.yml
+
+  roles:
+    - role: install
+      tags: install
+    - role: ec2-keys
+      tags: ec2-keys
+    - role: ec2
+      tags: ec2
+    - role: vpc
+      tags: vpc

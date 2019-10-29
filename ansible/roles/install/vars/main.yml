@@ -1,0 +1,5 @@
+install_aws_packages:
+  - "awscli"
+  - "botocore"
+  - "boto3"
+  - "boto"

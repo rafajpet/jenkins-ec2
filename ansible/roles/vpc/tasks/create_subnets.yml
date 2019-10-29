@@ -1,0 +1,40 @@
+---
+
+- name: "Include tasks to get info about subnets"
+  include_tasks: find_subnets.yml
+
+- block:
+    - name: "Create aws subnet for: {{ aws_vpc_name }}"
+      ec2_vpc_subnet:
+        region: "{{ aws_vpc_region }}"
+        vpc_id: "{{ vpc_id }}"
+        az: "{{ az }}"
+        cidr: "{{ subnet }}"
+        map_public: "{{ public_ip }}"
+        resource_tags:
+          Name: "{{ name }}"
+        state: present
+      vars:
+        name: "{{ item.key }}-{{ cloud_name }}"
+        az: "{{ item.value['zone'] }}"
+        subnet: "{{ item.value['subnet'] }}"
+        public_ip: "{{ item.value['public'] | default(False) }}"
+      with_dict: "{{ aws_vpc_zones }}"
+      register: _vpc_subnets_create_result
+
+
+    - debug:
+        msg: "{{ _vpc_subnets_create_result }}"
+      when: "debug_aws | default(False)"
+
+
+    - name: "Get info about public subnet"
+      ec2_vpc_subnet_facts:
+        filters:
+          "tag:Name": "public-zone-{{ cloud_name }}"
+      register: _public_subnet_out
+
+
+    - set_fact:
+        vpc_subnet_id: "{{ _public_subnet_out.subnets[0].id }}"
+  when: not vpc_subnets_created

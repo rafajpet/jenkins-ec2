@@ -1,0 +1,26 @@
+---
+
+- name: "Include tasks to find security group"
+  include_tasks: find_security_group.yml
+
+- block:
+    - name: "Security group for: {{ aws_vpc_name }}"
+      ec2_group:
+        name: "{{ aws_vpc_name }}"
+        description: "Security group for: {{ aws_vpc_name }} Port: 22"
+        vpc_id: "{{ vpc_id }}"
+        region: "{{ aws_vpc_region }}"
+        rules: "{{ aws_group_rules }}"
+        tags:
+          Name: "{{ aws_vpc_name }}"
+      register: _security_group_result
+
+
+    - debug:
+        msg: "{{ _security_group_result }}"
+      when: "debug_aws | default(False)"
+
+    - set_fact:
+        security_group_id: "{{ _security_group_result.group_id }}"
+
+  when: not vpc_security_group_created

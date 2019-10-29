@@ -1,0 +1,18 @@
+- hosts: localhost
+  connection: local
+  gather_facts: False
+  environment:
+    AWS_ACCESS_KEY_ID: "{{ aws_access_key }}"
+    AWS_SECRET_ACCESS_KEY: "{{ aws_secret_key }}"
+    AWS_DEFAULT_REGION: "{{ aws_region }}"
+
+  vars:
+    debug_aws: True
+    ec2_key_name: "private-cloud-work"
+  vars_files:
+    - vars/sensitive.yml
+    - vars/jenkins/config.yml
+
+  roles:
+    - role: ec2-keys
+      tags: ec2-keys

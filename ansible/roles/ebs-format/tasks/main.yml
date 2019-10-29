@@ -1,0 +1,22 @@
+---
+
+- block:
+    - name: "creating mount point (directory)"
+      file:
+        state: directory
+        path: "{{ ebs_mount_folder }}"
+
+
+    - name: "formatting the volume"
+      filesystem:
+        dev: "{{ ebs_volume_name }}"
+        fstype: "ext4" #ext4, ext3 etc
+
+
+    - name: "mounting the filesystem"
+      mount:
+        name: "{{ ebs_mount_folder }}"
+        src: "{{ ebs_volume_name }}"
+        fstype: "ext4" #ext4, ext3 etc
+        state: mounted
+  when: mount_ebs | default(True)

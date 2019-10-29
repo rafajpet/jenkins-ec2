@@ -1,0 +1,25 @@
+---
+
+- name: "Get info about vpc subnets"
+  ec2_vpc_subnet_facts:
+    filters:
+      "tag:Name": "{{ name }}"
+  vars:
+    name: "{{ item.key }}-{{ cloud_name }}"
+  with_dict: "{{ aws_vpc_zones }}"
+  register: _find_vpc_subnets_result
+
+
+- debug:
+    msg: "{{ _find_vpc_subnets_result }}"
+  when: "debug_aws | default(False)"
+
+
+- set_fact:
+    vpc_subnets_created: False
+
+
+- set_fact:
+    vpc_subnets_created: True
+    vpc_subnet_id: "{{ _find_vpc_subnets_result.results[0].subnets[0].id }}"
+  when: "_find_vpc_subnets_result.results[0].subnets"

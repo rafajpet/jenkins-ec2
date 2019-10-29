@@ -1,0 +1,2 @@
+ec2_keys_location: "~/.ssh"
+ec2_key_name: "private-cloud-work"

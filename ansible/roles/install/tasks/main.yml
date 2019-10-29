@@ -1,0 +1,4 @@
+---
+
+- name: "Include task to install aws cli"
+  include_tasks: install_aws_cli.yml

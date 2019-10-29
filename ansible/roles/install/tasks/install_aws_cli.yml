@@ -1,0 +1,5 @@
+---
+
+- name: "Install aws cli python library"
+  pip:
+    name: "{{ install_aws_packages }}"

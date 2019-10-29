@@ -1,0 +1,11 @@
+---
+
+- ec2_vol:
+    instance: "{{ ec2_id }}"
+    state: list
+    register: _ec2_vol_list_out
+
+
+- debug:
+    msg: "{{ _ec2_vol_list_out }}"
+  when: "debug_aws | default(False) "

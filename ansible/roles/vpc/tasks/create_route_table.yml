@@ -1,0 +1,28 @@
+---
+
+- name: "Include task to find IGW route table"
+  include_tasks: find_route_table.yml
+
+
+- block:
+    - name: "Setup subnet route table for: {{ aws_vpc_name }}"
+      ec2_vpc_route_table:
+        vpc_id: "{{ vpc_id }}"
+        region: "{{ aws_vpc_region }}"
+        tags:
+          Name: "{{ name }}-{{ cloud_name }}"
+        subnets: "{{ name }}-{{ cloud_name }}"
+        routes:
+          - dest: 0.0.0.0/0
+            gateway_id: "{{ vpc_igw_id }}"
+      vars:
+        name: "{{ item }}"
+      with_items: "{{ aws_vpc_zones.keys() | list }}"
+      register: _vpc_route_table_create_result
+
+
+    - debug:
+        msg: "{{ _vpc_route_table_create_result }}"
+      when: "debug_aws | default(False)"
+
+  when: not vpc_route_table_created

@@ -1,0 +1,31 @@
+---
+
+- name: "Get info about ec2 instance"
+  ec2_instance_facts:
+   filters:
+      "tag:Name": "{{ cloud_name }}"
+      "instance-state-name": ["running" ]
+  register: _ec2_find_result
+
+
+- debug:
+    msg: "{{ _ec2_find_result }}"
+  when: "debug_aws | default(False) "
+
+
+- set_fact:
+    ec2_created: "{{ _ec2_find_result.instances | length > 0 }}"
+
+
+- block:
+    - set_fact:
+        ec2_user: "ubuntu"
+        ec2_public_dns_name: "{{ _ec2_find_result.instances[0].public_dns_name }}"
+        ec2_id: "{{ _ec2_find_result.instances[0].instance_id }}"
+
+
+    - debug:
+        msg: "AWS ec2 instace public dns: {{ ec2_public_dns_name }}"
+      when: "debug_aws | default(False)"
+
+  when: ec2_created
